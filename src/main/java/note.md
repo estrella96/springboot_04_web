@@ -113,3 +113,107 @@ public void addResourceHandlers(ResourceHandlerRegistry registry){
             }
         }
 ```
+
+## 模板引擎
+JSP Thymeleaf Velocity Freemarker
+- Thymeleaf
+    语法简单 功能强大
+- 1 引入thymeleaf
+```xml
+<!--引入模板引擎-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+```
+- 2 thymeleaf使用&语法
+    
+```java
+//默认规则
+public class ThymeleafProperties {
+    private static final Charset DEFAULT_ENCODING;
+    public static final String DEFAULT_PREFIX = "classpath:/templates/";
+    public static final String DEFAULT_SUFFIX = ".html";
+    private boolean checkTemplate = true;
+    private boolean checkTemplateLocation = true;
+    private String prefix = "classpath:/templates/";
+    private String suffix = ".html";
+    //只要我们把html页面放在"classpath:/templates/"，thymeleaf 就能自动渲染
+    
+```
+```java
+@Controller
+public class HelloController {
+    @ResponseBody
+    @RequestMapping("/success")
+    public String success(){
+        //classpath:/templates/success.html
+        return "success";
+    }
+}
+```
+
+ - 使用：官方文档
+    1 导入thymeleaf的名称空间
+    `<html lang="en" xmlns:th="http://www.thymeleaf.org" >`
+    2 使用thymeleaf语法
+    ```html
+        <!DOCTYPE html>
+        <html lang="en" xmlns:th="http://www.thymeleaf.org" >
+        <head>
+            <meta charset="UTF-8">
+            <title>Title</title>
+        </head>
+        <body>
+            <h1>成功！</h1>
+            <!--th:text:设置div的文本内容-->
+            <!--不经过引擎渲染显示前端数据 经过之后后台数据-->
+            <div th:text="${hello}">这是欢迎信息</div>
+        
+        </body>
+        </html>
+    ```
+    3 语法规则
+        - th:text 改变当前元素里面的文本内容
+        - th:任意html属性 来替换原生属性的值
+        ![属性](./picture_note/attribute.png)
+        - 表达式(语法) 4 standard expression syntax
+        ```properties
+            Simple expressions:
+            VariableExpressions: ${...}  获取变量值OGNL： 获取对象属性、调用方法  使用内置的基本对象 内置工具对象
+            SelectionVariableExpressions: *{...}  选择表达式 与$功能相同 取了object之后可以直接用*{属性}
+            MessageExpressions: #{...} 获取国际化内容
+            LinkURLExpressions: @{...}  定义url链接
+            Fragment Expressions: ~{...} 片段引用表达式
+            
+            Literals（字面量）
+            Text literals: 'one text' , 'Another one!' ,... 
+            Number literals: 0 , 34 , 3.0 , 12.3 ,... 
+            Boolean literals: true , false
+            Nullliteral: null
+            Literal tokens: one , sometext , main ,... 
+            
+            Text operations:（文本操作）
+            Stringconcatenation: +
+            Literal substitutions: |The name is ${name}|
+            
+            Arithmetic operations: （数学运算）
+            Binaryoperators: +, -, *, /, %
+            Minussign(unaryoperator): - 
+            
+            Boolean operations:（布尔运算）
+            Binary operators: and , or
+            Boolean negation (unary operator): ! , not
+            
+            Comparisons and equality:（比较运算）
+            Comparators: >, <, >=, <= (gt, lt, ge, le)
+            Equality operators: == , != ( eq , ne ) 
+            
+            Conditional operators:（条件运算）
+            If-then: (if) ? (then)
+            If-then-else: (if) ? (then) : (else) 
+            Default: (value) ?: (defaultvalue)
+            
+            Special tokens:（特殊操作）
+            No-Operation: _
+        ```
