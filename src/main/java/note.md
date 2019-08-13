@@ -216,4 +216,90 @@ public class HelloController {
             
             Special tokens:（特殊操作）
             No-Operation: _
-        ```
+     ```
+## Spring MVC自动配置
+
+- 官方文档  
+默认配置  
+Spring MVC Auto-configuration
+Spring Boot provides auto-configuration for Spring MVC that works well with most applications. The auto-configuration adds the following features on top of Spring’s defaults:
+• Inclusion of ContentNegotiatingViewResolver and BeanNameViewResolver beans.
+    - 自动配置了ViewResolver(视图解析器 根据方法的返回值得到视图对象（View） 视图对象决定如何渲染：转发？重定向？)
+    - ContentNegotiatingViewResolver 组合所有的视图解析器
+    - 如何定制：自己给容器中添加一个视图解析器
+• Support for serving static resources,including support for WebJars(covered later in this document)). 静态资源文件夹路径和webjars
+• Automatic registration of Converter, GenericConverter, and Formatter beans. 
+    - 自动注册
+    - Converter：转换器 类型转换
+    - Formatter:格式化器 在配置文件中配置日期格式化的规则
+    - 自己添加的格式化转换器 只需要放在容器中
+• Support for HttpMessageConverters (covered later in this document).
+    - HttpMessageConverters：转换Http请求和响应的  User----json
+    - 从容器中确定 获取所有的HttpMessageConverters
+• Automatic registration of MessageCodesResolver (covered later in this document).
+    - 定义错误代码生成规则
+• Static index.html support.静态首页访问
+• Custom Favicon support (covered later in this document). favicon.ico
+• Automatic use of a ConfigurableWebBindingInitializer bean (covered later in this document).
+    - 可以配置一个ConfigurableWebBindingInitializer来替换默认值
+
+
+If you want to keep Spring Boot MVC features and you want to add additional MVC configuration (interceptors, formatters, view controllers, and other features), 
+you can add your own @Configuration class of type WebMvcConfigurer but without @EnableWebMvc. If you wish to provide custom instances of RequestMappingHandlerMapping, RequestMappingHandlerAdapter, or ExceptionHandlerExceptionResolver, 
+you can declare a WebMvcRegistrationsAdapter instance to provide such components.
+If you want to take complete control of Spring MVC, you can add your own @Configuration annotated with @EnableWebMvc.
+```java
+        @Bean
+        @ConditionalOnBean({ViewResolver.class})
+        @ConditionalOnMissingBean(
+            name = {"viewResolver"},
+            value = {ContentNegotiatingViewResolver.class}
+        )
+        public ContentNegotiatingViewResolver viewResolver(BeanFactory beanFactory) {
+            ContentNegotiatingViewResolver resolver = new ContentNegotiatingViewResolver();
+            resolver.setContentNegotiationManager((ContentNegotiationManager)beanFactory.getBean(ContentNegotiationManager.class));
+            resolver.setOrder(-2147483648);
+            return resolver;
+        }
+``` 
+
+## 扩展SpringMVC
+```xml
+    <!--把url：hello映射到success页面-->
+    <mvc:view-controller path="/hello" view-name="success"/>
+    <!--拦截器-->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/hello"/>
+            <bean></bean>
+        </mvc:interceptor>
+    </mvc:interceptors>
+```
+- 编写一个配置类@Configuration 是WebMvcConfigurer类型 不能标注@EnableWebMvc
+```java
+//WebMvcConfigurerAdapter可以扩展SpringMVC的功能
+@Configuration
+//command+o 重写方法
+public class MyMvcConfig implements WebMvcConfigurer {
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        //super.addViewControllers(registry);
+//        浏览器发送/reselect请求来到success页面html
+        registry.addViewController("/reselect").setViewName("success");
+    }
+}
+```
+- 原理
+    - WebMvcAutoConfiguration是SpringMVC自动配置类
+    - 作其他自动配置时导入 @Import(EnableWebMvcConfiguration.class)
+    - 容器中所有WebMvcConfigurer都会一起起作用
+    - 自己的配置类也会被调用 
+- @EnableWebMvc全面接管 所有都自己配置
+    - 将WebMvcXConfigurationSupport组件导入进来
+    - 导入的只是SpringMVC最基本的功能   
+ 
+## 如何修改SpringBoot默认配置
+- 模式
+    - SpringBoot在自动配置很多组件时 首先看容器中有没有用户自己配置的（@Bean,@Component）
+        有就用用户配置的 没有才自动配置 可以有多个的组件 用户配置和默认组合
+    - 在SpringBoot中有xxxConfigurer帮助我们进行扩展配置
