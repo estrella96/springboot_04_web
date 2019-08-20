@@ -303,3 +303,4 @@ public class MyMvcConfig implements WebMvcConfigurer {
     - SpringBoot在自动配置很多组件时 首先看容器中有没有用户自己配置的（@Bean,@Component）
         有就用用户配置的 没有才自动配置 可以有多个的组件 用户配置和默认组合
     - 在SpringBoot中有xxxConfigurer帮助我们进行扩展配置
+    - 在SpringBoot中有xxxCustomizer帮助我们进行定制配置
